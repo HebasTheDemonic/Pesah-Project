@@ -1,0 +1,7 @@
+C:\Users\mike\source\repos\OrderManagmentProject\OrderManagmentProject\bin\Debug\OrderManagmentProject.exe.config
+C:\Users\mike\source\repos\OrderManagmentProject\OrderManagmentProject\bin\Debug\OrderManagmentProject.exe
+C:\Users\mike\source\repos\OrderManagmentProject\OrderManagmentProject\bin\Debug\OrderManagmentProject.pdb
+C:\Users\mike\source\repos\OrderManagmentProject\OrderManagmentProject\obj\Debug\OrderManagmentProject.csprojAssemblyReference.cache
+C:\Users\mike\source\repos\OrderManagmentProject\OrderManagmentProject\obj\Debug\OrderManagmentProject.csproj.CoreCompileInputs.cache
+C:\Users\mike\source\repos\OrderManagmentProject\OrderManagmentProject\obj\Debug\OrderManagmentProject.exe
+C:\Users\mike\source\repos\OrderManagmentProject\OrderManagmentProject\obj\Debug\OrderManagmentProject.pdb
