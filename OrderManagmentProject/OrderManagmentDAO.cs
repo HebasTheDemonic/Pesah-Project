@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -10,59 +11,50 @@ namespace OrderManagmentProject
 {
     static class OrderManagmentDAO
     {
-        static string connectionString = "data source =.; database = OrderManagment; integrated security = true ";
-
         static OrderManagmentDAO()
         {
 
         }
 
-        static int FindUserId(string username, string password)
+        static int FindUserId(Customer customer)
         {
             int customerID = 0;
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
+
             {
                 SqlCommand FindUserID = new SqlCommand();
                 FindUserID.Connection = connection;
-                FindUserID.CommandText = $"SELECT * FROM CUSTOMERS WHERE '{username}' = USERNAME";
-                FindUserID.CommandType = CommandType.Text;
-                //   FindUserID.CommandText = "DOES_USER_EXIST";
-                //   FindUserID.CommandType = CommandType.StoredProcedure;
+                FindUserID.CommandText = "WHAT_IS_USER_ID";
+                FindUserID.CommandType = CommandType.StoredProcedure;
 
-                //SqlParameter usernameParameter = new SqlParameter();
-                //usernameParameter.SqlDbType = SqlDbType.VarChar;
-                //usernameParameter.SqlValue = username;
-                //usernameParameter.ParameterName = "@username";
+                SqlParameter usernameParameter = new SqlParameter();
+                usernameParameter.SqlDbType = SqlDbType.VarChar;
+                usernameParameter.SqlValue = customer.Username;
+                usernameParameter.ParameterName = "@username";
 
-                //FindUserID.Parameters.Add(usernameParameter);
+                FindUserID.Parameters.Add(usernameParameter);
 
                 connection.Open();
                 SqlDataReader sqlDataReader = FindUserID.ExecuteReader();
                 while (sqlDataReader.Read() == true)
                 {
-                    if (password == (string)sqlDataReader["PASS_WORD"])
+                    if (customer.Password == (string)sqlDataReader["PASSWORD"])
                     {
-                        customerID = (int)sqlDataReader["CUSTOMER_ID"];
+                        customer.CustomerID = (int)sqlDataReader["ID"];
                     }
-
                 }
                 connection.Close();
             }
             return customerID;
         }
 
-        static void AddNewCustomer (Customer cust)
+        static void AddNewCustomer (Customer customer)
         {
-            bool flag = false;
 
-            using (SqlConnection connection = new SqlConnection($"{connectionString}; MultipleActiveResultSets = true"))
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
             {
-                SqlCommand checkIfUserExists = new SqlCommand();
-                checkIfUserExists.Connection = connection;
-                checkIfUserExists.CommandType = CommandType.Text;
-                checkIfUserExists.CommandText = $"SELECT * FROM CUSTOMERS WHERE '{cust.Username}' = CUSTOMERS.USERNAME";
-
+               
                 SqlCommand AddnewUser = new SqlCommand();
                 AddnewUser.Connection = connection;
                 AddnewUser.CommandText = "ADD_NEW_CUSTOMER";
@@ -70,50 +62,35 @@ namespace OrderManagmentProject
 
                 SqlParameter username = new SqlParameter();
                 username.SqlDbType = SqlDbType.VarChar;
-                username.Value = cust.Username;
+                username.Value = customer.Username;
                 username.ParameterName = "@USERNAME";
                 AddnewUser.Parameters.Add(username);
 
                 SqlParameter password = new SqlParameter();
                 password.SqlDbType = SqlDbType.VarChar;
-                password.Value = cust.Password;
+                password.Value = customer.Password;
                 password.ParameterName = "@PASSWORD";
                 AddnewUser.Parameters.Add(password);
 
                 SqlParameter firstName = new SqlParameter();
                 firstName.SqlDbType = SqlDbType.VarChar;
-                firstName.Value = cust.FirstName;
+                firstName.Value = customer.FirstName;
                 firstName.ParameterName = "@FIRSTNAME";
                 AddnewUser.Parameters.Add(firstName);
 
                 SqlParameter lastName = new SqlParameter();
                 lastName.SqlDbType = SqlDbType.VarChar;
-                lastName.Value = cust.LastName;
+                lastName.Value = customer.LastName;
                 lastName.ParameterName = "@LASTNAME";
                 AddnewUser.Parameters.Add(lastName);
 
                 SqlParameter creditNumber = new SqlParameter();
                 creditNumber.SqlDbType = SqlDbType.Int;
-                creditNumber.Value = cust.CreditNumber;
+                creditNumber.Value = customer.CreditNumber;
                 creditNumber.ParameterName = "@CREDITNUMBER";
                 AddnewUser.Parameters.Add(creditNumber);
 
                 connection.Open();
-                SqlDataReader sqlDataReader = checkIfUserExists.ExecuteReader();
-
-                while (sqlDataReader.Read() == true)
-                {
-                    flag = true;
-                }
-
-
-
-                if (flag)
-                {
-                    connection.Close();
-                    throw new UserAlreadyExistsException();
-                }
-
                 AddnewUser.ExecuteNonQuery();
                 connection.Close();
             }

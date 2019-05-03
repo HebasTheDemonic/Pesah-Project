@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -13,14 +14,9 @@ namespace OrderManagmentProject
         static void Main(string[] args)
         {
             string connectionString = "data source =.; database = OrderManagment; integrated security = true ";
-            Customer cust = new Customer("ASDAD", "edg", "ert", "hfg", 12);
-            bool flag = false;
-            using (SqlConnection connection = new SqlConnection($"{connectionString}; MultipleActiveResultSets = true"))
+            Customer customer = new Customer("A", "W", "ert", "hfg", 12);
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
             {
-                SqlCommand checkIfUserExists = new SqlCommand();
-                checkIfUserExists.Connection = connection;
-                checkIfUserExists.CommandType = CommandType.Text;
-                checkIfUserExists.CommandText = $"SELECT * FROM CUSTOMERS WHERE '{cust.Username}' = CUSTOMERS.USERNAME";
 
                 SqlCommand AddnewUser = new SqlCommand();
                 AddnewUser.Connection = connection;
@@ -58,21 +54,6 @@ namespace OrderManagmentProject
                 AddnewUser.Parameters.Add(creditNumber);
 
                 connection.Open();
-                SqlDataReader sqlDataReader = checkIfUserExists.ExecuteReader();
-
-                while (sqlDataReader.Read() == true)
-                {
-                    flag = true;
-                }
-
-                    
-
-                if (flag)
-                {
-                    connection.Close();
-                    throw new UserAlreadyExistsException();
-                }
-
                 AddnewUser.ExecuteNonQuery();
                 connection.Close();
             }
