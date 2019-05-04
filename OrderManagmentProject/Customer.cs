@@ -63,6 +63,12 @@ namespace OrderManagmentProject
 
         }
 
+        public Customer(string u, string p)
+        {
+            this.Username = u;
+            this.Password = p;
+        }
+
         public Customer(string u, string p, string f, string l, int c)
         {
             this.Username = u;
@@ -70,6 +76,11 @@ namespace OrderManagmentProject
             this.FirstName = f;
             this.LastName = l;
             this.CreditNumber = c;
+        }
+
+        public void GetCustomerID()
+        {
+
         }
     }
 }

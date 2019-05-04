@@ -13,50 +13,58 @@ namespace OrderManagmentProject
     {
         static void Main(string[] args)
         {
-            string connectionString = "data source =.; database = OrderManagment; integrated security = true ";
             Customer customer = new Customer("A", "W", "ert", "hfg", 12);
-            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
+            OrderManagmentDAO.FindUserId(customer);
+            string tmp;
+            using (SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
             {
+                SqlCommand FindOrders = new SqlCommand();
+                FindOrders.Connection = sqlConnection;
+                FindOrders.CommandText = "SHOW_USER_ORDERS";
+                FindOrders.CommandType = CommandType.StoredProcedure;
 
-                SqlCommand AddnewUser = new SqlCommand();
-                AddnewUser.Connection = connection;
-                AddnewUser.CommandText = "ADD_NEW_CUSTOMER";
-                AddnewUser.CommandType = CommandType.StoredProcedure;
+                SqlParameter idParameter = new SqlParameter();
+                idParameter.SqlDbType = SqlDbType.Int;
+                idParameter.Value = customer.CustomerID;
+                idParameter.ParameterName = "@USERID";
+                FindOrders.Parameters.Add(idParameter);
 
-                SqlParameter username = new SqlParameter();
-                username.SqlDbType = SqlDbType.VarChar;
-                username.Value = cust.Username;
-                username.ParameterName = "@USERNAME";
-                AddnewUser.Parameters.Add(username);
-
-                SqlParameter password = new SqlParameter();
-                password.SqlDbType = SqlDbType.VarChar;
-                password.Value = cust.Password;
-                password.ParameterName = "@PASSWORD";
-                AddnewUser.Parameters.Add(password);
-
-                SqlParameter firstName = new SqlParameter();
-                firstName.SqlDbType = SqlDbType.VarChar;
-                firstName.Value = cust.FirstName;
-                firstName.ParameterName = "@FIRSTNAME";
-                AddnewUser.Parameters.Add(firstName);
-
-                SqlParameter lastName = new SqlParameter();
-                lastName.SqlDbType = SqlDbType.VarChar;
-                lastName.Value = cust.LastName;
-                lastName.ParameterName = "@LASTNAME";
-                AddnewUser.Parameters.Add(lastName);
-
-                SqlParameter creditNumber = new SqlParameter();
-                creditNumber.SqlDbType = SqlDbType.Int;
-                creditNumber.Value = cust.CreditNumber;
-                creditNumber.ParameterName = "@CREDITNUMBER";
-                AddnewUser.Parameters.Add(creditNumber);
-
-                connection.Open();
-                AddnewUser.ExecuteNonQuery();
-                connection.Close();
+                Console.WriteLine(" Order Number  |  Product Name | Amount Ordered| Total Price  ");
+                sqlConnection.Open();
+                SqlDataReader sqlDataReader = FindOrders.ExecuteReader();
+                while (sqlDataReader.Read() == true)
+                {
+                    tmp = Convert.ToString(sqlDataReader["order"]);
+                    if (tmp.Length < 15)
+                    {
+                        tmp = tmp.PadLeft(15).Substring(0, 15);
+                    }
+                    
+                    Console.Write(tmp);
+                    tmp = (string)sqlDataReader["name"];
+                    if (tmp.Length < 15)
+                    {
+                        tmp = tmp.PadLeft(15).Substring(0, 15);
+                    }
+                    Console.Write("|");
+                    Console.Write(tmp);
+                    tmp = Convert.ToString(sqlDataReader["amount"]);
+                    if (tmp.Length < 15)
+                    {
+                        tmp = tmp.PadLeft(15).Substring(0, 15);
+                    }
+                    Console.Write("|");
+                    Console.Write(tmp);
+                    tmp = Convert.ToString(sqlDataReader["price"]);
+                    if (tmp.Length < 15)
+                    {
+                        tmp = tmp.PadLeft(15).Substring(0, 15);
+                    }
+                    Console.Write("|");
+                    Console.WriteLine(tmp);
+                }
             }
+            Console.ReadKey();
         }
     }
 }
