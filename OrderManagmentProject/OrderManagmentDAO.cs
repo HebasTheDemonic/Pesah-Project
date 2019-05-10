@@ -61,7 +61,7 @@ namespace OrderManagmentProject
             }
         }
 
-        static bool DoesProductExist(int productID)
+        static bool DoesProductExistByName(string procuctName)
         {
             int result;
 
@@ -69,20 +69,106 @@ namespace OrderManagmentProject
             {
                 SqlCommand sqlCommand = new SqlCommand();
                 sqlCommand.Connection = connection;
-                sqlCommand.CommandText = "DOES_PRODUCT_EXIST";
+                sqlCommand.CommandText = "DOES_PRODUCT_EXIST_BY_NAME";
                 sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                SqlParameter usernameParameter = new SqlParameter();
-                usernameParameter.SqlDbType = SqlDbType.Int;
-                usernameParameter.SqlValue = productID;
-                usernameParameter.ParameterName = "@PRODUCTID";
+                SqlParameter productNameParameter = new SqlParameter();
+                productNameParameter.SqlDbType = SqlDbType.VarChar;
+                productNameParameter.SqlValue = procuctName;
+                productNameParameter.ParameterName = "@PRODUCTNAME";
 
                 SqlParameter returnParameter = new SqlParameter();
                 returnParameter.SqlDbType = SqlDbType.Int;
                 returnParameter.Direction = ParameterDirection.Output;
                 returnParameter.ParameterName = "@RETURN";
 
-                sqlCommand.Parameters.Add(usernameParameter);
+                sqlCommand.Parameters.Add(productNameParameter);
+                sqlCommand.Parameters.Add(returnParameter);
+
+                connection.Open();
+                SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+                result = (int)returnParameter.Value;
+                connection.Close();
+            }
+
+            if (result == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private static bool DoesProductExistByID(int productID)
+        {
+            int result;
+
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
+            {
+                SqlCommand sqlCommand = new SqlCommand();
+                sqlCommand.Connection = connection;
+                sqlCommand.CommandText = "DOES_PRODUCT_EXIST_BY_ID";
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                SqlParameter productNameParameter = new SqlParameter();
+                productNameParameter.SqlDbType = SqlDbType.Int;
+                productNameParameter.SqlValue = productID;
+                productNameParameter.ParameterName = "@PRODUCTID";
+
+                SqlParameter returnParameter = new SqlParameter();
+                returnParameter.SqlDbType = SqlDbType.Int;
+                returnParameter.Direction = ParameterDirection.Output;
+                returnParameter.ParameterName = "@RETURN";
+
+                sqlCommand.Parameters.Add(productNameParameter);
+                sqlCommand.Parameters.Add(returnParameter);
+
+                connection.Open();
+                SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+                result = (int)returnParameter.Value;
+                connection.Close();
+            }
+
+            if (result == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        static bool DoesSupplierIdMatch (Product product)
+        {
+            int result;
+
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
+            {
+                SqlCommand sqlCommand = new SqlCommand();
+                sqlCommand.Connection = connection;
+                sqlCommand.CommandText = "DOES_PRODUCT_EXIST_BY_ID";
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                SqlParameter productIdParameter = new SqlParameter();
+                productIdParameter.SqlDbType = SqlDbType.Int;
+                productIdParameter.SqlValue = product.ID;
+                productIdParameter.ParameterName = "@PRODUCTID";
+
+                SqlParameter supplierIdParameter = new SqlParameter();
+                supplierIdParameter.SqlDbType = SqlDbType.Int;
+                supplierIdParameter.SqlValue = product.SupplierID;
+                supplierIdParameter.ParameterName = "@SUPPLIERID";
+
+                SqlParameter returnParameter = new SqlParameter();
+                returnParameter.SqlDbType = SqlDbType.Int;
+                returnParameter.Direction = ParameterDirection.Output;
+                returnParameter.ParameterName = "@RETURN";
+
+                sqlCommand.Parameters.Add(productIdParameter);
+                sqlCommand.Parameters.Add(supplierIdParameter);
                 sqlCommand.Parameters.Add(returnParameter);
 
                 connection.Open();
@@ -114,7 +200,7 @@ namespace OrderManagmentProject
             {
                 SqlCommand sqlCommand = new SqlCommand();
                 sqlCommand.Connection = connection;
-                sqlCommand.CommandText = "DOES_USER_EXIST";
+                sqlCommand.CommandText = "DOES_SUPPLIER_EXIST";
                 sqlCommand.CommandType = CommandType.StoredProcedure;
 
                 SqlParameter usernameParameter = new SqlParameter();
@@ -146,9 +232,87 @@ namespace OrderManagmentProject
             }
         }
 
+        static bool DoesCustomerHaveOrders(Customer customer)
+        {
+            if (customer.CustomerID == 0)
+            {
+                throw new InsufficientDataException();
+            }
+
+            int result;
+
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
+            {
+                SqlCommand sqlCommand = new SqlCommand();
+                sqlCommand.Connection = connection;
+                sqlCommand.CommandText = "DOES_USER_HAVE_ORDERS";
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                SqlParameter customerIdParameter = new SqlParameter();
+                customerIdParameter.SqlDbType = SqlDbType.Int;
+                customerIdParameter.SqlValue = customer.CustomerID;
+                customerIdParameter.ParameterName = "@USERID";
+
+                SqlParameter returnParameter = new SqlParameter();
+                returnParameter.SqlDbType = SqlDbType.Int;
+                returnParameter.Direction = ParameterDirection.Output;
+                returnParameter.ParameterName = "@RETURN";
+
+                sqlCommand.Parameters.Add(customerIdParameter);
+                sqlCommand.Parameters.Add(returnParameter);
+
+                connection.Open();
+                SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+                result = (int)returnParameter.Value;
+                connection.Close();
+            }
+
+            if (result > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        static bool DoesStoreHaveStock()
+        {
+            int result;
+
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
+            {
+                SqlCommand sqlCommand = new SqlCommand();
+                sqlCommand.Connection = connection;
+                sqlCommand.CommandText = "PRODUCTS_WITH_INVENTORY";
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                SqlParameter returnParameter = new SqlParameter();
+                returnParameter.SqlDbType = SqlDbType.Int;
+                returnParameter.Direction = ParameterDirection.Output;
+                returnParameter.ParameterName = "@RETURN";
+                sqlCommand.Parameters.Add(returnParameter);
+
+                connection.Open();
+                SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+                result = (int)returnParameter.Value;
+                connection.Close();
+            }
+
+            if (result > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         static int CheckInventory(int productID)
         {
-            if (!DoesProductExist(productID))
+            if (!DoesProductExistByID(productID))
             {
                 throw new InsufficientDataException();
             }
@@ -212,6 +376,8 @@ namespace OrderManagmentProject
                     if (customer.Password == (string)sqlDataReader["PASSWORD"])
                     {
                         customer.CustomerID = (int)sqlDataReader["ID"];
+                        customer.FirstName = (string)sqlDataReader["FIRST"];
+                        customer.LastName = (string)sqlDataReader["LAST"];
                     }
                     else
                     {
@@ -227,7 +393,7 @@ namespace OrderManagmentProject
         {
             if (!DoesSupplierExist(supplier))
             {
-                throw new SupplierDoesNotExistException();
+                throw new UserDoesNotExistException();
             }
 
             using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
@@ -251,6 +417,7 @@ namespace OrderManagmentProject
                     if (supplier.Password == (string)sqlDataReader["PASSWORD"])
                     {
                         supplier.ID = (int)sqlDataReader["ID"];
+                        supplier.CompanyName = (string)sqlDataReader["COMPANY"];
                     }
                     else
                     {
@@ -318,7 +485,7 @@ namespace OrderManagmentProject
         {
             if (DoesSupplierExist(supplier))
             {
-                throw new SupplierAlreadyExistsException();
+                throw new UserAlreadyExistsException();
             }
 
             using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
@@ -356,9 +523,9 @@ namespace OrderManagmentProject
 
         static public void AddNewProduct(Product product)
         {
-            if (DoesProductExist(product.ID))
+            if (DoesProductExistByName(product.Name))
             {
-                throw new ProductAlreadyExistsException();
+                UpdateInventory(product);
             }
 
             using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
@@ -401,17 +568,12 @@ namespace OrderManagmentProject
 
         static public void AddNewOrder(int customerID, int productID, int Amount)
         {
-            if (customerID == 0 || productID == 0)
+            if (customerID == 0 || productID <= 0)
             {
                 throw new InsufficientDataException();
             }
 
-            if (Amount <= 0)
-            {
-                throw new WrongAmountException();
-            }
-
-            if (!DoesProductExist(productID))
+            if (!DoesProductExistByID(productID))
             {
                 throw new ProductDoesNotExistException();
             }
@@ -448,10 +610,49 @@ namespace OrderManagmentProject
                 SqlParameter priceParameter = new SqlParameter();
                 priceParameter.SqlDbType = SqlDbType.Int;
                 priceParameter.ParameterName = "@PRICE";
+                priceParameter.Value = 0;
                 newOrder.Parameters.Add(priceParameter);
 
                 connection.Open();
                 newOrder.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+
+        private static void UpdateInventory(Product product)
+        {
+            if (!DoesSupplierIdMatch(product))
+            {
+                throw new ProductAlreadyExistsException();
+            }
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
+            {
+
+                SqlCommand AddnewProduct = new SqlCommand();
+                AddnewProduct.Connection = connection;
+                AddnewProduct.CommandText = "UPDATE_INVENTORY";
+                AddnewProduct.CommandType = CommandType.StoredProcedure;
+
+                SqlParameter nameParameter = new SqlParameter();
+                nameParameter.SqlDbType = SqlDbType.VarChar;
+                nameParameter.Value = product.Name;
+                nameParameter.ParameterName = "@PRODUCTNAME";
+                AddnewProduct.Parameters.Add(nameParameter);
+
+                SqlParameter idParameter = new SqlParameter();
+                idParameter.SqlDbType = SqlDbType.Int;
+                idParameter.Value = product.SupplierID;
+                idParameter.ParameterName = "@SUPPLIERID";
+                AddnewProduct.Parameters.Add(idParameter);
+
+                SqlParameter amountParameter = new SqlParameter();
+                amountParameter.SqlDbType = SqlDbType.Int;
+                amountParameter.Value = product.Inventory;
+                amountParameter.ParameterName = "@AMOUNT";
+                AddnewProduct.Parameters.Add(amountParameter);
+
+                connection.Open();
+                AddnewProduct.ExecuteNonQuery();
                 connection.Close();
             }
         }
@@ -462,7 +663,14 @@ namespace OrderManagmentProject
             {
                 throw new InsufficientDataException();
             }
+
+            if (!DoesCustomerHaveOrders(customer))
+            {
+                throw new UserHasNoOrdersException();
+            }
+
             string tmp;
+
             using (SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
             {
                 SqlCommand FindOrders = new SqlCommand();
@@ -511,11 +719,16 @@ namespace OrderManagmentProject
                     Console.WriteLine(tmp);
                 }
                 sqlConnection.Close();
+                Console.WriteLine();
             }
         }
 
         static public void PrintAllProducts()
         {
+            if (!DoesStoreHaveStock())
+            {
+                throw new StoreHasNoStockException();
+            }
             string tmp;
             using (SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
             {
@@ -559,6 +772,7 @@ namespace OrderManagmentProject
                     Console.WriteLine(tmp);
                 }
                 sqlConnection.Close();
+                Console.WriteLine();
             }
         }
 
@@ -568,6 +782,7 @@ namespace OrderManagmentProject
             {
                 throw new InsufficientDataException();
             }
+
             string tmp;
             using (SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
             {
@@ -617,6 +832,82 @@ namespace OrderManagmentProject
                     Console.WriteLine(tmp);
                 }
                 sqlConnection.Close();
+                Console.WriteLine();
+            }
+        }
+
+        static public void PrintRegistry(int length)
+        {
+            string tmp;
+            using (SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
+            {
+                SqlCommand PrintRegistry = new SqlCommand();
+                PrintRegistry.Connection = sqlConnection;
+                PrintRegistry.CommandText = "PRINT_REGISTRY";
+                PrintRegistry.CommandType = CommandType.StoredProcedure;
+
+                SqlParameter lengthParameter = new SqlParameter();
+                lengthParameter.SqlDbType = SqlDbType.Int;
+                lengthParameter.Value = length;
+                lengthParameter.ParameterName = "@LENGTH";
+                PrintRegistry.Parameters.Add(lengthParameter);
+
+                Console.WriteLine(" Time and Date of Action |Action Made By           |Action Type              |Action Result            ");
+                sqlConnection.Open();
+                SqlDataReader sqlDataReader = PrintRegistry.ExecuteReader();
+                while (sqlDataReader.Read() == true)
+                {
+                    tmp = Convert.ToString(sqlDataReader["DATE"]);
+                    tmp = tmp.PadLeft(25).Substring(0, 25);
+                    Console.Write(tmp);
+                    tmp = (string)sqlDataReader["BY"];
+                    tmp = tmp.PadLeft(25).Substring(0, 25);
+                    Console.Write("|");
+                    Console.Write(tmp);
+                    tmp = Convert.ToString(sqlDataReader["TYPE"]);
+                    tmp = tmp.PadLeft(25).Substring(0, 25);
+                    Console.Write("|");
+                    Console.Write(tmp);
+                    tmp = Convert.ToString(sqlDataReader["RESULT"]);
+                    tmp = tmp.PadLeft(25).Substring(0, 25);
+                    Console.Write("|");
+                    Console.WriteLine(tmp);
+                }
+                sqlConnection.Close();
+                Console.WriteLine();
+            }
+        }
+
+        static public void ActionRegistry(string actionBy, string actionType, string actionResult = " ")
+        {
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["sqlDBConnection"].ConnectionString))
+            {
+                SqlCommand registry = new SqlCommand();
+                registry.Connection = connection;
+                registry.CommandText = "MAKE_REGISTRY";
+                registry.CommandType = CommandType.StoredProcedure;
+
+                SqlParameter actionByParameter = new SqlParameter();
+                actionByParameter.SqlDbType = SqlDbType.VarChar;
+                actionByParameter.Value = actionBy;
+                actionByParameter.ParameterName = "@ACTION_BY";
+                registry.Parameters.Add(actionByParameter);
+
+                SqlParameter actionTypeParameter = new SqlParameter();
+                actionTypeParameter.SqlDbType = SqlDbType.VarChar;
+                actionTypeParameter.Value = actionType;
+                actionTypeParameter.ParameterName = "@ACTION_TYPE";
+                registry.Parameters.Add(actionTypeParameter);
+
+                SqlParameter actionResultParameter = new SqlParameter();
+                actionResultParameter.SqlDbType = SqlDbType.VarChar;
+                actionResultParameter.Value = actionResult;
+                actionResultParameter.ParameterName = "@ACTION_RESULT";
+                registry.Parameters.Add(actionResultParameter);
+
+                connection.Open();
+                registry.ExecuteNonQuery();
+                connection.Close();
             }
         }
     }

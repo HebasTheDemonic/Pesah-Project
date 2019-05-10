@@ -16,6 +16,12 @@ namespace OrderManagmentProject
 
         }
 
+        public Supplier(string u, string p)
+        {
+            Username = u;
+            Password = p;
+        }
+
         public Supplier(string u, string p, string c)
         {
             Username = u;

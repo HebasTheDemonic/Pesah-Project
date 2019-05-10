@@ -14,6 +14,11 @@ namespace OrderManagmentProject
         static void Main(string[] args)
         {
             Console.WriteLine("Welcome To The Web Store.");
+            int menuOption = 0;
+            while (menuOption != 6)
+            {
+                menuOption = Menu.MainMenu();
+            }
         }
     }
 }
